@@ -1,6 +1,8 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const app = express();
+const methodOverride = require("method-override"); // new
+const morgan = require("morgan"); //new
 require('dotenv').config();
 
 
@@ -12,6 +14,9 @@ mongoose.connect(process.env.MONGODB_URI);
 mongoose.connection.on('connected', () => {
     console.log(`Connected to MongoDB ${mongoose.connection.name}`)
   });
+  app.use(express.urlencoded({ extended: false }))
+  app.use(methodOverride("_method")); // new
+app.use(morgan("dev")); //new
 const Car = require('./models/car.js');
 app.get('/test', (req, res) => {
   res.send('Server is running!');
@@ -47,18 +52,18 @@ app.get('/cars/:id/edit', async (req, res) => {
   const car = await Car.findById(req.params.id);
   res.render('edit.ejs', { car });
 });
-/*
-app.post('/cars/:id/edit', async (req, res) => {
+
+app.put('/cars/:id', async (req, res) => {
   await Car.findByIdAndUpdate(req.params.id, req.body);
   res.redirect(`/cars/${req.params.id}`);
 });
 
 
-app.post('/cars/:id/delete', async (req, res) => {
+app.delete('/cars/:id', async (req, res) => {
   await Car.findByIdAndDelete(req.params.id);
   res.redirect('/cars');
 });
-*/
+
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
